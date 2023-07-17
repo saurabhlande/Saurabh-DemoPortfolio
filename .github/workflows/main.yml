@@ -1,4 +1,4 @@
-name: React CI
+name: Website deploy
 
 on:
   push:
@@ -14,7 +14,16 @@ jobs:
         node-version: [15.x]
     
     steps:
-      - uses: actions/checkout@v1
-      - run: npm install
-      - run: npm run build
-      - run: npm test
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Deploy to S3 Bucket
+        run: |
+          aws s3 sync ./path/to/website s3://saurabh-portfolio-bucket --delete
