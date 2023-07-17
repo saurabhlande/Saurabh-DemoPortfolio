@@ -1,23 +1,20 @@
-name: Upload Website
+name: React CI
 
 on:
   push:
     branches:
-    - master
+      - "master"
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [15.x]
+    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
-
-    - name: Deploy static site to S3 bucket
-      run: aws s3 sync ./public/ s3://saurabh-portfolio-bucket --delete
+      - uses: actions/checkout@v1
+      - run: npm install
+      - run: npm run build
+      - run: npm test
