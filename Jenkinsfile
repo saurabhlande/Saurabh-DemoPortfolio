@@ -5,36 +5,37 @@ pipeline {
         stage('Code') {
             steps {
                 echo "Cloning the code"
-				git url:"<URL>", branch:"main"
+                git url: "https://github.com/saurabhlande/saurabh_demo_portfolio", branch: "main"
             }
         }
-		stage('Build') {
+        stage('Build') {
             steps {
                 echo "Building the image"
-				sh  “docker build -t my-note-app”
+                sh "docker build -t saurabh_demo_portfolio ."
+                echo "Build Done"
             }
         }
-		stage('Push image on Docker Hub') {
+        stage('Push image on Docker Hub') {
             steps {
                 echo "Pushing the image on Docker Hub"
-				
-				# use Credentials like username & password for login inside the dockerHub
-				withCredentials([usernamePassword(credentialsId:"dockerHub", passwordVariable:"dockerHubPass", usernameVariable:"dockerHubUser")])
-				
-				# use for tag the the project name with "username/<peoject_name>" when send on DockerHub
-				sh "docker tag my-note-app ${env.dockerHubUser}/my-note-app:letest"
-				sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-				sh "docker push ${env.dockerHubUser}/my-note-app:letest"
+                withCredentials([usernamePassword(credentialsId: "dockerHub", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
+                    
+                    // Tag the image with DockerHub username and project name
+                    sh 'docker tag saurabh_demo_portfolio ${dockerHubUser}/saurabh_demo_portfolio:latest'
+                    
+                    // Login to DockerHub
+                    sh 'echo ${dockerHubPass} | docker login -u ${dockerHubUser} --password-stdin'
+                    
+                    // Push the image to DockerHub
+                    sh 'docker push ${dockerHubUser}/saurabh_demo_portfolio:latest'
+                }
             }
         }
-		stage('Deploy') {
+        stage('Deploy') {
             steps {
-                echo "Deploy on the container"
-				#sh "docker run -d -p 8000:8000 <dockerHubUser>/my-note-app:letest"
-				#But If we run our application using the docker run command then it will run the first time successfully. 
-				#Then the error will be shown a second time because the 8000 port is already used. 
-				#So for that, we need to use docker-compose it we run container automaticaly we no need to put container name.
-				sh "docker-compose down && docker-compose up"
+                echo "Deploying on the container"
+                // Ensure docker-compose is in the correct directory and points to the correct file
+                sh "docker-compose down && docker-compose up -d"
             }
         }
     }
