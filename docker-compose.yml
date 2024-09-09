@@ -1,6 +1,6 @@
 version: '3'
 services:
-  app:
+  web:
     image: saurabhlande/saurabh_demo_portfolio:latest
     ports:
       - "8000:8000"
